@@ -1,5 +1,9 @@
+import re
 from typing import Dict, Any, Optional, List
 from xml.etree.ElementTree import Element
+
+from ShitMountainGenerator.common import parse_attr
+from ShitMountainGenerator.exceptions import InvalidTemplateDeclerationException
 
 
 class SelectCase:
@@ -32,22 +36,37 @@ class SelectStatement:
     cases: List[SelectCase]
     default: Optional[str]
 
-    def __init__(self, body: Element):
-        self.name = body.get("name")
-        self.body = body
-        self.var_name = body.get("var")
+    def __init__(self, name: str, var_name: str, body: List[str]):
+        self.name = name
+        self.var_name = var_name
         self.cases = []
         self.default = None
-        children = body.getchildren()
-        for child in children:
-            if child.tag == "case":
-                self.cases.append(SelectCase(child.get("test"), child.text))
-            elif child.tag == "default":
-                self.default = child.text
+        block = ""
+        for line in body:
+            if line.startswith("<case"):
+                block = line
+            elif line.startswith("<default"):
+                block = ""
+            elif line.startswith("</case"):
+                self.cases.append(self._parse_case(block))
+            elif line.startswith("</default"):
+                self.default = block
+            else:
+                block += re.sub(r"\t|[ ]{4}", "", line)
+
+    def _parse_case(self, block: str) -> SelectCase:
+        lines = block.splitlines()
+        attrs = parse_attr(lines[0])
+        if "test" not in attrs:
+            raise InvalidTemplateDeclerationException("attribute `test` required for case statement")
+        return SelectCase(attrs["test"], "\n".join(lines[1:]))
 
     def select_shit(self, context: Dict[str, Any]) -> Optional[str]:
         for case in self.cases:
-            if (case.perform_test(context[self.var_name])):
+            if case.perform_test(context[self.var_name]):
                 return case.content
         else:
-            return self.default
+            if self.default is not None:
+                return self.default
+            else:
+                return ""

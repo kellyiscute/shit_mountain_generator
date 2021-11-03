@@ -17,12 +17,12 @@
 </tmpl>
 
 <select name="to_json_item_sel" var="is_struct">
-	<case test="bool(True)">
+    <case test="True">
 		"{{ json_name }}": self._{{ py_name }}.to_json() if self._{{ py_name }} is not None else None
-	</case>
-	<case test="bool(False)">
+    </case>
+    <case test="False">
 		"{{ json_name }}": self._{{ py_name }}
-	</case>
+    </case>
 </select>
 
 <tmpl name="to_json_item">
@@ -30,30 +30,33 @@
 </tmpl>
 
 <select name="from_json_item_normal_struct_sel" var="is_struct">
-	<case test="bool(True)">
+    <case test="True">
 		self._{{ py_name }} = {{ name }}().from_json(json["{{ json_name }}"]) if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else {{ name }}()
-	</case>
-	<case test="bool(False)">
+    </case>
+    <case test="False">
 		self._{{ py_name }} = json["{{ json_name }}"] if "{{ json_name }}" in json else None
-	</case>
+    </case>
 </select>
 
 <select name="from_json_item_list_struct_sel" var="is_struct">
-	<case test="bool(True)">
+    <case test="True">
 		self._{{ py_name }} = [{{ name }}().from_json(json[d]) for d in json["{{ json_name }}"]] if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else {{ name }}()
-	</case>
-	<case test="bool(True)">
+    </case>
+    <case test="True">
 		self._{{ py_name }} = json["{{ json_name }}"] if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else None
-	</case>
+    </case>
 </select>
 
 <select name="from_json_item_sel" var="is_list">
-	<case test="bool(True)">
+    <case test="True">
 		{{ use(from_json_item_list_struct_sel) }}
-	</case>
-	<case test="bool(False)">
+    </case>
+    <case test="False">
 		{{ use(from_json_item_normal_struct_sel) }}
-	</case>
+    </case>
+    <default>
+
+    </default>
 </select>
 
 <tmpl name="from_json_item">
@@ -79,4 +82,3 @@
 			{% from_json_item <- fields %}
 			return self
 </tmpl>
-

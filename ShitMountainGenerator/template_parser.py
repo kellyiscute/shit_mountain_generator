@@ -1,15 +1,29 @@
-from typing import List
 import re
-from ShitMountainGenerator.template import Template
+from typing import List, Tuple
+
+from ShitMountainGenerator.common import parse_attr
+from ShitMountainGenerator.exceptions import InvalidTemplateDeclerationException
 from ShitMountainGenerator.select_statement import SelectStatement
+from ShitMountainGenerator.template import Template
 
 
 def parse_tmpl(block: str) -> Template:
-    # TODO: unfinished
-    pass
+    lines = block.splitlines()
+    attr_dict = parse_attr(lines[0])
+    lines = lines[1:]
+    return Template(attr_dict["name"] if "name" in attr_dict else "$main$", "\n".join(lines))
 
 
-def parse(data: str):
+def parse_select(block: str) -> SelectStatement:
+    lines = block.splitlines(True)
+    attrs = parse_attr(lines[0])
+    if "name" not in attrs or "var" not in attrs:
+        raise InvalidTemplateDeclerationException(
+                "attribute `name` and `var` required for select statement")
+    return SelectStatement(name=attrs["name"], var_name=attrs["var"], body=lines[1:])
+
+
+def parse(data: str) -> Tuple[List[Template], List[SelectStatement]]:
     lines = data.splitlines(True)
     templates: List[Template] = []
     select_statements: List[SelectStatement] = []
@@ -23,13 +37,9 @@ def parse(data: str):
         elif line.startswith("<select"):
             block = line
         elif line.startswith("</select>"):
-            pass  # TODO
+            select_statements.append(parse_select(block))
         else:
             # remove leading indent
             block += leading_indent.sub("", line)
 
-
-
-if __name__ == '__main__':
-    f = open("data_class.tmpl", "r")
-    parse(f.read())
+    return templates, select_statements
