@@ -1,0 +1,82 @@
+<tmpl name="private_fields">
+	_{{ py_name }}: Optional[{{ py_type }}] = None
+</tmpl>
+
+<tmpl name="property">
+	@property
+	def {{ py_name }}(self):
+		return _{{ py_name }}
+
+	@{{ py_name }}.setter
+	def {{ py_name }}(self, value: {{ py_type }}):
+		self.{{ py_name }} = value
+		if self.on_dirty_callback is None:
+			raise Exception("Orphan {{ py_class_name }}")
+		else:
+			self.on_dirty_callback(self)
+</tmpl>
+
+<select name="to_json_item_sel" var="is_struct">
+	<case test="bool(True)">
+		"{{ json_name }}": self._{{ py_name }}.to_json() if self._{{ py_name }} is not None else None
+	</case>
+	<case test="bool(False)">
+		"{{ json_name }}": self._{{ py_name }}
+	</case>
+</select>
+
+<tmpl name="to_json_item">
+	{{ use(to_json_item_sel) }}
+</tmpl>
+
+<select name="from_json_item_normal_struct_sel" var="is_struct">
+	<case test="bool(True)">
+		self._{{ py_name }} = {{ name }}().from_json(json["{{ json_name }}"]) if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else {{ name }}()
+	</case>
+	<case test="bool(False)">
+		self._{{ py_name }} = json["{{ json_name }}"] if "{{ json_name }}" in json else None
+	</case>
+</select>
+
+<select name="from_json_item_list_struct_sel" var="is_struct">
+	<case test="bool(True)">
+		self._{{ py_name }} = [{{ name }}().from_json(json[d]) for d in json["{{ json_name }}"]] if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else {{ name }}()
+	</case>
+	<case test="bool(True)">
+		self._{{ py_name }} = json["{{ json_name }}"] if "{{ json_name }}" in json and json["{{ json_name }}"] is not None else None
+	</case>
+</select>
+
+<select name="from_json_item_sel" var="is_list">
+	<case test="bool(True)">
+		{{ use(from_json_item_list_struct_sel) }}
+	</case>
+	<case test="bool(False)">
+		{{ use(from_json_item_normal_struct_sel) }}
+	</case>
+</select>
+
+<tmpl name="from_json_item">
+	{{ use(from_json_item_sel) }}
+</tmpl>
+
+<tmpl name="$main$">
+	from dataclasses import dataclass
+	from typing import List, Optional, Callable
+
+
+	@dataclass
+	class {{ py_class_name }}:
+		{% private_fields <- fields %}
+		on_dirty_callback: Optional[Callable["{{ py_class_name }}", None]]
+
+		def to_json(self):
+			return {
+				{% to_json_item <- fields %}
+			}
+
+		def from_json(self, json: dict) -> "{{ py_class_name }}":
+			{% from_json_item <- fields %}
+			return self
+</tmpl>
+
