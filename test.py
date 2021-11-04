@@ -1,7 +1,7 @@
 from ShitMountainGenerator.shitter import Shitter
 
 if __name__ == '__main__':
-    shitter = Shitter.from_template("./ShitMountainGenerator/data_class.tmpl")
+    shitter = Shitter.from_template("test_case.tmpl")
     r = shitter.shit({
             "fields"       : [
                     {

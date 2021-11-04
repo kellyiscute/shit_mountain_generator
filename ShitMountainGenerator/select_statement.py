@@ -14,17 +14,14 @@ class SelectCase:
         self.test = test
         self.content = content
 
-    def perform_test(self, var) -> bool:
+    def perform_test(self, var: str) -> bool:
         if type(var) is int or type(var) is float:
             try:
                 return var == float(self.test)
             except:
                 return False
         elif type(var) is bool:
-            try:
-                return var == bool(self.test)
-            except:
-                return False
+            return str(var) == self.test
         elif type(var) is str:
             return var == str(self.test)
 
@@ -69,4 +66,4 @@ class SelectStatement:
             if self.default is not None:
                 return self.default
             else:
-                return ""
+                raise Exception(f"No default value defined but nothing matches: \n    select: {self.name}\n    var: {self.var_name}\n    target value: {context[self.var_name]}\n")
