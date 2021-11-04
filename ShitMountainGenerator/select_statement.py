@@ -38,25 +38,24 @@ class SelectStatement:
         self.var_name = var_name
         self.cases = []
         self.default = None
-        block = ""
+        block = []
         for line in body:
             if line.startswith("<case"):
-                block = line
+                block = [line]
             elif line.startswith("<default"):
-                block = ""
+                block = []
             elif line.startswith("</case"):
-                self.cases.append(self._parse_case(block))
+                self.cases.append(self._parse_case(block[:]))
             elif line.startswith("</default"):
-                self.default = block
+                self.default = "".join(block)
             else:
-                block += re.sub(r"\t|[ ]{4}", "", line)
+                block.append(re.sub(r"^\t|( {4})", "", line, 1))
 
-    def _parse_case(self, block: str) -> SelectCase:
-        lines = block.splitlines()
+    def _parse_case(self, lines: List[str]) -> SelectCase:
         attrs = parse_attr(lines[0])
         if "test" not in attrs:
             raise InvalidTemplateDeclerationException("attribute `test` required for case statement")
-        return SelectCase(attrs["test"], "\n".join(lines[1:]))
+        return SelectCase(attrs["test"], "".join(lines[1:]))
 
     def select_shit(self, context: Dict[str, Any]) -> Optional[str]:
         for case in self.cases:

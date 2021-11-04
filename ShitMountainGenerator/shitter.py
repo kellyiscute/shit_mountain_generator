@@ -53,11 +53,11 @@ class Shitter:
             template_result = self._run_template(template, inner_context)
             result_lines.extend(self._add_indent(template_result, indent))
 
-        return "\n".join(result_lines)
+        return "\n".join(result_lines) + "\n"
 
     def _process_var_operation(self, line: str, expression: str, context: Context) -> str:
         if expression.startswith("use("):
-            replacement = self.select_statements[expression.replace("use(", "")[:-1]].select_shit(context)
+            replacement = self.select_statements[expression.replace("use(", "")[:-1]].select_shit(context).rstrip()
         else:
             replacement = str(context[expression])
 
@@ -76,7 +76,7 @@ class Shitter:
     def _run_template(self, template: Template, context: Context) -> str:
         result_lines: List[str] = []
 
-        content = template.raw_content.splitlines()
+        content = template.raw_content.splitlines(True)
         for line in content:
             result_line = line
             if (match := self._var_pattern.search(line)) is not None:
@@ -86,7 +86,7 @@ class Shitter:
 
             result_lines.append(result_line)
 
-        return "\n".join(result_lines)
+        return "".join(result_lines)
 
     def shit(self, context: Context) -> str:
         return self._run_template(self.templates["$main$"], context)

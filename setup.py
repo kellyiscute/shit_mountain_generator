@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name='shit_mountain_generator',
-        version='1.0.1',
+        version='1.0.2',
         packages=['ShitMountainGenerator'],
         url='https://github.com/guo40020/shit_mountain_generator',
         license='MIT',
