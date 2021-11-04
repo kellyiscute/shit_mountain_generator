@@ -40,7 +40,7 @@ class Shitter:
         result = []
         block = block.splitlines()
         for line in block:
-            result.append(indent + self._indent_detection_pattern.sub("", line, 1))
+            result.append(indent + line)
 
         return result
 

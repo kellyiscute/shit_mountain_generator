@@ -78,4 +78,7 @@
 		def from_json(self, json: dict) -> "{{ py_class_name }}":
 			{% from_json_item <- fields %}
 			return self
+
+		{% property <- fields %}
+
 </tmpl>
