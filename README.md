@@ -1,12 +1,18 @@
-# 💩shit_mountain_generator
+# 💩Shit Mountain Generator
 
-A general purpose template driven code generator
+A general purpose template driven code generator  
+Contribute shits to your company's shit mountain more efficiently!
 
 ## Quick Start
 
 ### Install
 
 `pip3 install shit_mountain_generator`
+
+### vscode Template Language Highlighting
+
+The vscode extension for shit template language highlight support is now on marketplace!
+search for `Shit Template Language` in vscode extension tab to install
 
 ### Create a generator script
 
