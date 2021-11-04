@@ -1,6 +1,7 @@
-# 💩shit_mountain_generator
+# 💩Shit Mountain Generator
 
-A general purpose template driven code generator
+A general purpose template driven code generator  
+Contribute shits to your company's shit mountain more efficiently!
 
 ## Quick Start
 
